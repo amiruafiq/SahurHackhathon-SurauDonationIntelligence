@@ -24,7 +24,7 @@ This project solves that by providing a **SaaS portal** where any surau admin ca
         ▼
 ┌─────────────────────┐
 │   Web Portal        │  Static site (S3 + CloudFront)
-│   React / HTML      │  Auth via Amazon Cognito
+│   HTML / JS         │  Auth via Amazon Cognito
 └────────┬────────────┘
          │ Upload via Pre-signed S3 URL
          ▼
@@ -65,14 +65,14 @@ This project solves that by providing a **SaaS portal** where any surau admin ca
 - 📤 Self-service upload — mosque admin uploads PDF via web portal (no AWS console access needed)
 - 🔍 Auto PDF parsing using `pdfplumber` (local) or AWS Textract (cloud)
 - 📊 Per-mosque dashboard showing:
-  - Monthly inflow vs outflow
-  - Running balance over time
+  - Total donations received (RM)
+  - Current balance (RM)
   - Daily donation trend (bar chart)
   - Donations by channel (DuitNow QR, IBG Transfer, Cash Deposit)
-  - Top donors / largest transactions
+  - Running balance over time
+  - Top 10 donors
 - 🔒 Data isolation — each mosque only sees their own data (QuickSight Row-Level Security)
 - 🔔 SNS notification when a new statement is processed
-- 💰 Estimated cost: under USD 20/month for up to 5 surau
 
 ---
 
@@ -93,12 +93,33 @@ This project solves that by providing a **SaaS portal** where any surau admin ca
 
 ---
 
-## 🌐 SaaS Portal
+## 🌐 SaaS Web Portal (`portal/index.html`)
 
-The web portal allows mosque admins to:
-1. **Login** with their Cognito credentials
-2. **Upload** their monthly bank statement PDF
-3. **View** their auto-generated QuickSight dashboard — embedded directly in the portal
+The web portal is a single HTML file — no framework needed. Host it on S3 + CloudFront.
+
+### Login Screen
+- Email + password form
+- Demo credentials pre-filled for easy testing
+- Enter key support
+- Error feedback with colour-coded status badges
+
+### Dashboard Screen (after login)
+- Navbar with mosque name + Sign Out button
+- **KPI cards** — Current Balance & Feb 2026 Donations
+- **Drag & drop upload zone** — accepts PDF/CSV
+- **Progress bar** with 3-stage feedback:
+  `Requesting URL → Uploading to S3 → Lambda ETL Running → ✅ Done`
+- Statement month selector
+- **View Dashboard** button → opens QuickSight embedded dashboard
+- **Upload history table** with ✅ Done / ⏳ Processing status badges
+
+### To go live — replace 3 things in `<script>`:
+
+| Code Block | Replace With |
+|---|---|
+| `DEMO_USERS` block | Cognito SDK `authenticateUser()` call |
+| `setTimeout` upload demo | Real `fetch()` to API Gateway pre-signed URL endpoint |
+| `viewDashboard()` demo | Real `fetch()` to get QuickSight embedded URL |
 
 ### Portal Flow
 
@@ -118,25 +139,8 @@ S3 trigger fires Lambda ETL → CSV written to curated/{mosque_id}/
 QuickSight refreshes → Dashboard live within ~2 minutes
 ```
 
-### Key Portal Code
+### Key Backend Lambda — Generate Pre-signed URL
 
-**Frontend — Upload via Pre-signed URL**
-```javascript
-// Get pre-signed URL from API Gateway
-fetch(`${CONFIG.apiEndpoint}/upload-url`, {
-  method: 'POST',
-  headers: { 'Authorization': token },
-  body: JSON.stringify({ mosque_id, filename })
-})
-.then(r => r.json())
-.then(data => fetch(data.upload_url, {
-  method: 'PUT',
-  body: file,
-  headers: { 'Content-Type': 'application/pdf' }
-}));
-```
-
-**Backend Lambda — Generate Pre-signed URL**
 ```python
 import boto3, json
 
@@ -164,6 +168,70 @@ def lambda_handler(event, context):
         'body': json.dumps({'upload_url': url})
     }
 ```
+
+---
+
+## 💰 AWS Cost Estimate
+
+Estimated monthly cost to run this platform for **up to 10 mosques**:
+
+| Service | Usage Assumption | Est. Monthly Cost (USD) |
+|---|---|---|
+| S3 (Raw + Curated) | ~500 MB storage + uploads | ~$0.50 |
+| Lambda | ~120 invocations/month (10 mosques × 12 statements/yr) | ~$0.00 (free tier) |
+| Athena | ~50 queries/month × avg 1 MB scanned | ~$0.00 (free tier) |
+| AWS Glue Catalog | < 1M objects | ~$0.00 (free tier) |
+| Amazon Cognito | < 10,000 MAU | **FREE** (free tier) |
+| CloudFront | Static portal hosting, < 1 GB/month | ~$0.10 |
+| QuickSight Author | 1 author (dashboard builder) | ~$24.00 |
+| QuickSight Reader | Up to 10 mosque admins × $3/user | ~$30.00 |
+| SNS Notifications | < 1,000 emails/month | ~$0.00 (free tier) |
+| **Total** | | **~$55/month** |
+
+> 💡 QuickSight dominates the cost. For a hackathon demo, use 1 Author + Reader sessions to minimize cost.
+> With capacity pricing (500 sessions/month), cost is ~$250/month — suitable when scaling to 50+ mosques.
+
+---
+
+## 📈 SaaS Pricing Model (How Much to Charge)
+
+If commercialised as a SaaS product for Malaysian mosques/suraus:
+
+| Tier | Target | Price (MYR/month) | Features |
+|---|---|---|---|
+| 🆓 Free | Small surau | RM 0 | 1 statement/month, basic dashboard |
+| 🥈 Basic | Active surau | RM 49/month | 3 statements/month, all charts, email report |
+| 🥇 Pro | Mosque (JAWI-registered) | RM 99/month | Unlimited uploads, multi-branch, custom branding |
+| 🏢 Enterprise | JAWI / NGO (bulk) | RM 299/month | All mosques in 1 district, API access, audit log |
+
+### Revenue Potential
+
+| Scenario | Mosques | Price | Monthly Revenue |
+|---|---|---|---|
+| Conservative | 20 mosques × Basic | RM 49 | **RM 980/month** |
+| Moderate | 50 mosques × Basic | RM 49 | **RM 2,450/month** |
+| Growth | 100 mosques × Pro | RM 99 | **RM 9,900/month** |
+| Scale | 500 mosques × Basic | RM 49 | **RM 24,500/month** |
+
+> 🕌 There are **~6,000 mosques** and **~30,000 suraus** in Malaysia — addressable market is large.
+> Even 1% penetration (300 mosques at RM 49/month) = **RM 14,700/month recurring revenue**.
+
+---
+
+## 🗺️ Build Roadmap
+
+| Phase | Task | Status |
+|---|---|---|
+| 1 | PDF extraction + CSV output (local) | ✅ Done |
+| 2 | S3 upload + Lambda ETL trigger | ✅ Done |
+| 3 | Glue Catalog + Athena query | ✅ Done |
+| 4 | QuickSight dashboard | ✅ Done |
+| 5 | Web portal HTML (demo mode) | ✅ Done |
+| 6 | Cognito auth + API Gateway | 🚧 In Progress |
+| 7 | Pre-signed URL Lambda | 🚧 In Progress |
+| 8 | QuickSight embedding in portal | 🔄 Planned |
+| 9 | Row-Level Security (multi-mosque) | 🔄 Planned |
+| 10 | Terraform IaC | 🔄 Planned |
 
 ---
 
@@ -204,18 +272,18 @@ raw/surau-raudhatul-salam/2026-02_statement.pdf
 ```
 masjid-finance-dashboard/
 │
-├── extract.py              # Local PDF → CSV extractor
-├── lambda_handler.py       # AWS Lambda ETL function
-├── lambda_presigned_url.py # Lambda to generate S3 pre-signed upload URL
-├── requirements.txt        # Python dependencies
+├── extract.py                  # Local PDF → CSV extractor
+├── lambda_handler.py           # AWS Lambda ETL function
+├── lambda_presigned_url.py     # Lambda to generate S3 pre-signed upload URL
+├── requirements.txt            # Python dependencies
 ├── portal/
-│   └── index.html          # SaaS web portal (upload + dashboard)
+│   └── index.html              # SaaS web portal (login + upload + dashboard)
 ├── sample/
 │   └── sample_statement.pdf
 ├── output/
 │   └── surau_transactions.csv
 ├── dashboard/
-│   └── quicksight_setup.md # QuickSight setup guide
+│   └── quicksight_setup.md     # QuickSight setup guide
 └── README.md
 ```
 
@@ -239,22 +307,6 @@ Each mosque's data is isolated using:
 - **S3 folder structure**: `raw/{mosque_id}/` and `curated/{mosque_id}/`
 - **Cognito User Pool**: each admin belongs to a group matching their `mosque_id`
 - **QuickSight Row-Level Security**: dataset rules filter rows by `mosque_id` per user
-
----
-
-## 🗺️ Build Roadmap
-
-| Phase | Task | Status |
-|---|---|---|
-| 1 | PDF extraction + CSV output (local) | ✅ Done |
-| 2 | S3 upload + Lambda ETL trigger | ✅ Done |
-| 3 | Glue Catalog + Athena query | ✅ Done |
-| 4 | QuickSight dashboard | ✅ Done |
-| 5 | Cognito auth + web portal | 🚧 In Progress |
-| 6 | API Gateway + pre-signed URL Lambda | 🚧 In Progress |
-| 7 | QuickSight embedding in portal | 🔄 Planned |
-| 8 | Row-Level Security (multi-mosque) | 🔄 Planned |
-| 9 | Terraform IaC | 🔄 Planned |
 
 ---
 
@@ -282,5 +334,5 @@ MIT License — free to use for non-profit and community organisations.
 
 ## 👤 Author
 
-**Afiq Kurshid**  
+**Afiq Kurshid**
 Cloud Security Architect | AWS | Hackathon 2026

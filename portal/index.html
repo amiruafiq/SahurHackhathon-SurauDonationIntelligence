@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🕌 Masjid Finance Portal</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a237e 0%, #00695c 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container { width: 100%; max-width: 480px; }
+
+    .logo { text-align: center; margin-bottom: 24px; color: white; }
+    .logo .icon { font-size: 52px; }
+    .logo h1 { font-size: 24px; font-weight: 700; margin-top: 8px; }
+    .logo p  { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .card h2 { font-size: 20px; color: #1a237e; margin-bottom: 6px; }
+    .card .subtitle { font-size: 13px; color: #888; margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 600; color: #555;
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0;
+      border-radius: 8px; font-size: 14px; transition: border-color 0.2s; outline: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: #1a237e; }
+
+    .btn {
+      width: 100%; padding: 13px; border: none; border-radius: 8px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:hover  { opacity: 0.9; }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: linear-gradient(135deg, #1a237e, #283593); color: white; }
+    .btn-teal    { background: linear-gradient(135deg, #00695c, #00897b); color: white; }
+    .btn-outline { background: white; color: #1a237e; border: 1.5px solid #1a237e; margin-top: 10px; }
+
+    .divider {
+      display: flex; align-items: center; margin: 20px 0;
+      color: #aaa; font-size: 12px; gap: 10px;
+    }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:#e0e0e0; }
+
+    .status-box {
+      padding: 12px 16px; border-radius: 8px; font-size: 13px;
+      margin-top: 16px; display: none; align-items: center; gap: 10px;
+    }
+    .status-box.show      { display: flex; }
+    .status-info          { background: #e3f2fd; color: #1565c0; }
+    .status-success       { background: #e8f5e9; color: #2e7d32; }
+    .status-error         { background: #ffebee; color: #c62828; }
+    .status-processing    { background: #fff8e1; color: #f57f17; }
+
+    .upload-zone {
+      border: 2px dashed #c5cae9; border-radius: 10px; padding: 28px 20px;
+      text-align: center; cursor: pointer; transition: all 0.2s; background: #f5f7ff;
+    }
+    .upload-zone:hover  { border-color: #1a237e; background: #eeefff; }
+    .upload-zone.active { border-color: #00897b; background: #e8f5e9; }
+    .upload-zone .icon  { font-size: 36px; }
+    .upload-zone p      { font-size: 13px; color: #777; margin-top: 8px; }
+    .upload-zone strong { color: #1a237e; }
+    #file-input         { display: none; }
+    .file-name          { font-size: 13px; color: #00695c; font-weight: 600; margin-top: 8px; }
+
+    .progress-wrap { background: #e0e0e0; border-radius: 100px; height: 6px; margin-top: 12px; display: none; }
+    .progress-bar  { height: 6px; border-radius: 100px; background: linear-gradient(90deg, #1a237e, #00897b); width: 0%; transition: width 0.4s; }
+
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #f5f7ff; border-radius: 10px; padding: 14px; text-align: center; }
+    .stat-card .val { font-size: 20px; font-weight: 700; color: #1a237e; }
+    .stat-card .lbl { font-size: 11px; color: #888; margin-top: 3px; }
+
+    .navbar {
+      background: linear-gradient(135deg, #1a237e, #283593);
+      border-radius: 10px 10px 0 0; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin: -32px -32px 24px -32px;
+    }
+    .navbar .brand  { color: white; font-weight: 700; font-size: 15px; }
+    .navbar .sub    { color: rgba(255,255,255,0.75); font-size: 12px; }
+    .navbar .logout { color: rgba(255,255,255,0.7); font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+    .history-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .history-table th { background: #f5f7ff; padding: 8px 10px; text-align: left; color: #555; font-size: 11px; text-transform: uppercase; }
+    .history-table td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; }
+    .badge { padding: 3px 8px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+    .badge-done       { background: #e8f5e9; color: #2e7d32; }
+    .badge-processing { background: #fff8e1; color: #f57f17; }
+
+    #login-section, #dashboard-section { display: none; }
+    #login-section.active, #dashboard-section.active { display: block; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="logo">
+    <div class="icon">🕌</div>
+    <h1>Masjid Finance Portal</h1>
+    <p>Powered by AWS &middot; Secure &middot; Transparent &middot; Real-time</p>
+  </div>
+
+  <div class="card">
+
+    <!-- LOGIN -->
+    <div id="login-section" class="active">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Sign in to manage your mosque finance dashboard</p>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="admin@surau-raudhatul-salam.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+      </div>
+
+      <button class="btn btn-primary" onclick="login()">Sign In</button>
+      <div id="login-status" class="status-box"></div>
+
+      <div class="divider">Demo Credentials</div>
+      <div style="background:#f5f7ff;border-radius:8px;padding:12px;font-size:12px;color:#555;line-height:2;">
+        &nbsp;📧 <strong>admin@surau-raudhatul-salam.com</strong><br>
+        &nbsp;🔑 <strong>Password123!</strong><br>
+        &nbsp;🕌 Surau Raudhatul Salam, Kota Bharu
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard-section">
+      <div class="navbar">
+        <div>
+          <div class="brand">🕌 <span id="nav-mosque-name"></span></div>
+          <div class="sub" id="nav-mosque-id"></div>
+        </div>
+        <span class="logout" onclick="logout()">Sign Out</span>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="val" id="stat-balance">—</div>
+          <div class="lbl">Current Balance</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="stat-donations">—</div>
+          <div class="lbl">Feb 2026 Donations</div>
+        </div>
+      </div>
+
+      <h2 style="font-size:16px;margin-bottom:12px;">📤 Upload Bank Statement</h2>
+
+      <div class="upload-zone" id="upload-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+        <div class="icon">📄</div>
+        <p><strong>Click to upload</strong> or drag &amp; drop here</p>
+        <p>Bank Islam PDF &middot; Max 10MB</p>
+        <div class="file-name" id="file-name-display"></div>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,.csv" onchange="handleFileSelect(event)" />
+
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <div class="form-group" style="margin-top:16px;">
+        <label>Statement Month</label>
+        <select id="statement-month">
+          <option value="2026-02">February 2026</option>
+          <option value="2026-01">January 2026</option>
+          <option value="2025-12">December 2025</option>
+          <option value="2025-11">November 2025</option>
+        </select>
+      </div>
+
+      <button class="btn btn-teal" onclick="uploadFile()">📤 Upload &amp; Process Statement</button>
+      <button class="btn btn-outline" onclick="viewDashboard()">📊 View Finance Dashboard &rarr;</button>
+
+      <div id="upload-status" class="status-box"></div>
+
+      <div class="divider" style="margin-top:24px;">Upload History</div>
+      <table class="history-table">
+        <thead><tr><th>Month</th><th>File</th><th>Status</th></tr></thead>
+        <tbody id="history-body">
+          <tr>
+            <td>Feb 2026</td>
+            <td>2026-02_statement.pdf</td>
+            <td><span class="badge badge-done">✅ Done</span></td>
+          </tr>
+          <tr>
+            <td>Jan 2026</td>
+            <td>2026-01_statement.pdf</td>
+            <td><span class="badge badge-done">✅ Done</span></td>
+          </tr>
+          <tr>
+            <td>Dec 2025</td>
+            <td>2025-12_statement.pdf</td>
+            <td><span class="badge badge-processing">⏳ Processing</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const CONFIG = {
+    region:      'ap-southeast-1',
+    apiEndpoint: 'https://YOUR_API_GATEWAY_ID.execute-api.ap-southeast-1.amazonaws.com/prod'
+  };
+
+  const DEMO_USERS = {
+    'admin@surau-raudhatul-salam.com': {
+      password: 'Password123!', mosque_name: 'Surau Raudhatul Salam',
+      mosque_id: 'surau-raudhatul-salam', balance: 'RM 155,576', donations: 'RM 8,638'
+    },
+    'admin@masjid-al-hidayah.com': {
+      password: 'Password123!', mosque_name: 'Masjid Al-Hidayah',
+      mosque_id: 'masjid-al-hidayah', balance: 'RM 88,420', donations: 'RM 5,210'
+    }
+  };
+
+  let currentUser = null;
+  let selectedFile = null;
+
+  function login() {
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (!email || !password) {
+      showStatus('login-status', '⚠️ Please enter email and password.', 'status-error'); return;
+    }
+    showStatus('login-status', '⏳ Signing in...', 'status-processing');
+    // Demo mode — replace with Cognito SDK call in production
+    setTimeout(() => {
+      const user = DEMO_USERS[email];
+      if (user && user.password === password) {
+        currentUser = { ...user, email };
+        showDashboard();
+      } else {
+        showStatus('login-status', '❌ Invalid email or password.', 'status-error');
+      }
+    }, 800);
+  }
+
+  function showDashboard() {
+    document.getElementById('login-section').classList.remove('active');
+    document.getElementById('dashboard-section').classList.add('active');
+    document.getElementById('nav-mosque-name').innerText = currentUser.mosque_name;
+    document.getElementById('nav-mosque-id').innerText   = currentUser.mosque_id;
+    document.getElementById('stat-balance').innerText    = currentUser.balance;
+    document.getElementById('stat-donations').innerText  = currentUser.donations;
+  }
+
+  function logout() {
+    currentUser = null; selectedFile = null;
+    document.getElementById('dashboard-section').classList.remove('active');
+    document.getElementById('login-section').classList.add('active');
+    document.getElementById('email').value    = '';
+    document.getElementById('password').value = '';
+    hideStatus('login-status');
+  }
+
+  function handleFileSelect(e) { if (e.target.files[0]) setFile(e.target.files[0]); }
+  function handleDragOver(e)   { e.preventDefault(); document.getElementById('upload-zone').classList.add('active'); }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').classList.remove('active');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  }
+  function setFile(file) {
+    selectedFile = file;
+    document.getElementById('file-name-display').innerText = '📎 ' + file.name;
+    document.getElementById('upload-zone').classList.add('active');
+  }
+
+  function uploadFile() {
+    if (!selectedFile) {
+      showStatus('upload-status', '⚠️ Please select a PDF file first.', 'status-error'); return;
+    }
+    const month    = document.getElementById('statement-month').value;
+    const filename = month + '_statement.pdf';
+    showStatus('upload-status', '⏳ Requesting secure upload URL...', 'status-processing');
+    setProgress(20);
+
+    /* PRODUCTION — uncomment and replace demo block below:
+    fetch(`${CONFIG.apiEndpoint}/upload-url`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': currentUser.token },
+      body: JSON.stringify({ mosque_id: currentUser.mosque_id, filename })
+    })
+    .then(r => r.json())
+    .then(data => {
+      setProgress(50);
+      showStatus('upload-status', '⏳ Uploading to S3...', 'status-processing');
+      return fetch(data.upload_url, {
+        method: 'PUT', body: selectedFile, headers: { 'Content-Type': 'application/pdf' }
+      });
+    })
+    .then(() => {
+      setProgress(100);
+      showStatus('upload-status', '✅ Upload successful! Dashboard refreshes in ~2 minutes.', 'status-success');
+      addHistoryRow(month, filename);
+    })
+    .catch(err => showStatus('upload-status', '❌ ' + err.message, 'status-error'));
+    */
+
+    // Demo simulation
+    setTimeout(() => { setProgress(50);  showStatus('upload-status', '⏳ Uploading to S3...', 'status-processing'); }, 800);
+    setTimeout(() => { setProgress(80);  showStatus('upload-status', '⏳ Lambda ETL running...', 'status-processing'); }, 1800);
+    setTimeout(() => {
+      setProgress(100);
+      showStatus('upload-status', '✅ Upload successful! Dashboard will refresh in ~2 minutes.', 'status-success');
+      addHistoryRow(month, filename);
+    }, 2800);
+  }
+
+  function addHistoryRow(month, filename) {
+    const label = new Date(month + '-01').toLocaleString('en-MY', { month: 'long', year: 'numeric' });
+    document.getElementById('history-body').insertAdjacentHTML('afterbegin',
+      `<tr><td>${label}</td><td>${filename}</td><td><span class="badge badge-processing">⏳ Processing</span></td></tr>`
+    );
+  }
+
+  function viewDashboard() {
+    showStatus('upload-status', '⏳ Opening dashboard...', 'status-processing');
+    // PRODUCTION: fetch embedded QuickSight URL from API Gateway
+    // fetch(`${CONFIG.apiEndpoint}/dashboard-url`, { headers: { Authorization: currentUser.token } })
+    // .then(r => r.json()).then(d => window.open(d.dashboard_url, '_blank'));
+    setTimeout(() => {
+      showStatus('upload-status', '✅ Dashboard opened in new tab.', 'status-success');
+      window.open('https://quicksight.aws.amazon.com', '_blank');
+    }, 600);
+  }
+
+  function setProgress(pct) {
+    document.getElementById('progress-wrap').style.display = 'block';
+    document.getElementById('progress-bar').style.width    = pct + '%';
+  }
+  function showStatus(id, msg, cls) {
+    const el = document.getElementById(id);
+    el.className = 'status-box show ' + cls;
+    el.innerHTML = msg;
+  }
+  function hideStatus(id) { document.getElementById(id).className = 'status-box'; }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('login-section').classList.contains('active')) login();
+  });
+</script>
+</body>
+</html>
