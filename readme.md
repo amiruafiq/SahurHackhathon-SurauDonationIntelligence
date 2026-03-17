@@ -113,6 +113,13 @@ The web portal is a single HTML file — no framework needed. Host it on S3 + Cl
 - **View Dashboard** button → opens QuickSight embedded dashboard
 - **Upload history table** with ✅ Done / ⏳ Processing status badges
 
+![Portal Login ](Screenshot/website1.png)
+![Portal Login ](Screenshot/website2.png)
+![Portal Login ](Screenshot/website3.png)
+
+
+
+
 ### To go live — replace 3 things in `<script>`:
 
 | Code Block | Replace With |
