@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Bank statements & sensitive financial data
+*.pdf
+*.csv
+
 # C extensions
 *.so
 
