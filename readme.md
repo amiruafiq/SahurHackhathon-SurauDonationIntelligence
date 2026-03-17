@@ -62,6 +62,20 @@ This project solves that by providing a **SaaS portal** where any surau admin ca
 ```
 
 ---
+## 📊 Dashboard Visuals
+...
+![Main Dashboard](dashboard/dashboard1.png)
+![Main Dashboard](dashboard/dashboard2.png)
+![Main Dashboard](dashboard/dashboard3.png)
+![Main Dashboard](dashboard/dashboard4.png)
+![Main Dashboard](dashboard/dashboard5.png)
+![Main Dashboard](dashboard/dashboard6.png)
+![Main Dashboard](dashboard/dashboard7.png)
+
+---
+
+
+
 
 ## ✨ Features
 
