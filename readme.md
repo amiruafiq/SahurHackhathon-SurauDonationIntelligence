@@ -91,6 +91,11 @@ This project solves that by providing a **SaaS portal** where any surau admin ca
 | Notification | Amazon SNS |
 | IaC *(planned)* | Terraform |
 
+![AWS S3](Screenshot/awss3.png)
+![AWS Athena](Screenshot/4.png)
+![Local Python](Screenshot/2.png)
+
+
 ---
 
 ## 🌐 SaaS Web Portal (`portal/index.html`)
