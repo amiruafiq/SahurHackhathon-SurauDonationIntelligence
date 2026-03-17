@@ -1,10 +1,14 @@
-# 🕌 Masjid Finance Dashboard
+# 🕌 AmanahCloud
+### *Transparency for Every Mosque, Powered by AWS*
 
-> A serverless AWS SaaS platform that enables mosques and suraus to upload bank statements, auto-process transactions, and visualise finance data on an interactive dashboard (ETL)— with a multi-tenant web portal for self-service access.
+> "6,000 mosques. 30,000 suraus. Zero financial transparency tools. Until now."
 
-Built for: **Sahur Hackathon 2026**
+AmanahCloud is a serverless SaaS platform that transforms mosque bank 
+statements into real-time finance dashboards — automatically, securely, 
+and at near-zero cost.
+
+Built for: **GodamSahur 2026** 🏆
 Status: 🚧 In Development
-
 ---
 
 ## 📌 Problem Statement
