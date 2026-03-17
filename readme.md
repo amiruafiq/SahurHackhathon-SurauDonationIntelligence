@@ -1,8 +1,8 @@
 # 🕌 Masjid Finance Dashboard
 
-> A serverless AWS SaaS platform that enables mosques and suraus to upload bank statements, auto-process transactions, and visualise finance data on an interactive dashboard — with a multi-tenant web portal for self-service access.
+> A serverless AWS SaaS platform that enables mosques and suraus to upload bank statements, auto-process transactions, and visualise finance data on an interactive dashboard (ETL)— with a multi-tenant web portal for self-service access.
 
-Built for: **AWS Hackathon 2026**
+Built for: **Sahur Hackathon 2026**
 Status: 🚧 In Development
 
 ---
