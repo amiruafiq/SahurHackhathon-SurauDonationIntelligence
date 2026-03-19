@@ -329,6 +329,14 @@ Key visuals per mosque:
 - **Running Balance** — line chart (balance over time)
 - **Top 10 Donors** — horizontal bar chart (sender_name by credit_rm)
 
+![Portal Login ](dashboard/dashboard1.png)
+![Portal Login ](dashboard/dashboard2.png)
+![Portal Login ](dashboard/dashboard3.png)
+![Portal Login ](dashboard/dashboard4.png)
+![Portal Login ](dashboard/dashboard5.png)
+![Portal Login ](dashboard/dashboard6.png)
+![Portal Login ](dashboard/dashboard7.png)
+
 ---
 
 ## 🔐 Multi-Tenant Data Isolation
